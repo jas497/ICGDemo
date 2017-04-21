@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ICG Demo</string>
+    <string name="button_start">Start</string>
+    <string name="button_stop">Stop</string>
+    <string name="sec_current_value">Current value:</string>
+    <string name="default_app_not_running">App not running</string>
+    <string name="cannot_get_accelerometer">Cannot get accelerometer</string>
+</resources>
