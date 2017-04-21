@@ -25,15 +25,15 @@ import java.util.Arrays;
 @EActivity
 public class MainActivity extends Activity implements SensorEventListener {
 
+    private static final long THROTTLE_ACC_NS = 500_000_000;
     @SystemService
     protected SensorManager mSensorManager;
-    private Sensor mSensorAcc = null;
     @ViewById(R.id.text_current)
     protected TextView mCurrentValue;
+    private Sensor mSensorAcc = null;
     private long mLastSample = System.nanoTime();
-    private static final long THROTTLE_ACC_NS = 500_000_000;
-
     private Socket mSocket;
+    private BufferedWriter mBufferedWriter;
 
     /**
      * http://stackoverflow.com/a/35833800
@@ -74,6 +74,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     protected void initSocket() {
         try {
             mSocket = new Socket("192.168.10.1", 3398);
+            mSocket.setKeepAlive(true);
+            mBufferedWriter = new BufferedWriter(new OutputStreamWriter(mSocket.getOutputStream(), "UTF8"));
             Log.i("EECS398", "mSocket: " + mSocket.isConnected());
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,19 +90,14 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Background
     protected void sendToGateway(float[] vals) {
         String out = Arrays.toString(vals);
-        if (mSocket != null) {
+        if (mSocket != null && mSocket.isConnected()) {
             String path = "/caqms/recv";
             try {
-                mSocket = new Socket("192.168.10.1", 3398);
                 String data = URLEncoder.encode("data", "UTF-8") + "=" + URLEncoder.encode(out, "UTF-8");
-                BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(mSocket.getOutputStream(), "UTF8"));
-                wr.write("POST " + path + " HTTP/1.0\r\n");
-                wr.write("Content-Length: " + data.length() + "\r\n");
-                wr.write("Content-Type: application/x-www-form-urlencoded\r\n");
-                wr.write("\r\n");
-                wr.write(data);
-                wr.flush();
-                mSocket.close();
+                mBufferedWriter.write("GET " + path + "/?" + data + " HTTP/1.0\r\n");
+                mBufferedWriter.write("Host: 192.168.10.1\r\n");
+                mBufferedWriter.write("Connection: keep-alive\r\n");
+                mBufferedWriter.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
