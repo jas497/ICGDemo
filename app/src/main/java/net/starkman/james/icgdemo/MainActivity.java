@@ -6,10 +6,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
@@ -20,11 +18,9 @@ import org.androidannotations.annotations.ViewById;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.logging.SocketHandler;
 
 @EActivity
 public class MainActivity extends Activity implements SensorEventListener {
@@ -35,7 +31,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @ViewById(R.id.text_current)
     protected TextView mCurrentValue;
     private long mLastSample = System.nanoTime();
-    private static final long THROTTLE_ACC_US = 1_000_000;
+    private static final long THROTTLE_ACC_NS = 500_000_000;
 
     private Socket mSocket;
 
@@ -114,7 +110,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         long now = System.nanoTime();
-        if (now - mLastSample > THROTTLE_ACC_US) {
+        if (now - mLastSample > THROTTLE_ACC_NS) {
             mLastSample = now;
             if (event.sensor == mSensorAcc) {
                 float[] vals = event.values;
