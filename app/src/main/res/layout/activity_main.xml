@@ -38,4 +38,11 @@
         android:layout_height="wrap_content"
         android:text="@string/default_app_not_running"
         />
+
+    <Button
+        android:id="@+id/open_socket"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open socket"
+        />
 </LinearLayout>
